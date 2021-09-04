@@ -2,77 +2,6 @@ package finalproject;
 
 import java.util.*;
 
-class Customer {
-    int id;
-    String AC;
-    String userName;
-    String password;
-    String firstName;
-    String lastName;
-    double balance;
-    String branchCode;
-    boolean discountStatus;
-
-    Customer(int id, String AC, String userName, String password, String firstName, String lastName, double balance,
-            String branchCode, boolean discountStatus) {
-        this.id = id;
-        this.AC = AC;
-        this.userName = userName;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.balance = balance;
-        this.branchCode = branchCode;
-        this.discountStatus = discountStatus;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public String changeDiscountStatus(boolean discountStatus) {
-        this.discountStatus = discountStatus;
-        return "Discount Status Updated....!!!";
-    }
-
-    public String changePassword(String password) {
-        this.password = password;
-        return "Password Updated...!!!";
-    }
-
-    public String toString() {
-        return "ID: " + id + "\n" + "Account Number: " + AC + "\n" + "Name: " + firstName + " " + lastName + "\n"
-                + "Balance: " + balance;
-    }
-}
-
-class Order {
-    int id;
-    Date date;
-    double discount;
-    double grossAmount;
-    double totalCost;
-    boolean complete;
-
-    Order(int id, double discount, double grossAmount) {
-        this.id = id;
-        this.date = new Date();
-        this.discount = discount;
-        this.grossAmount = grossAmount;
-        this.totalCost = calculateTotal();
-        this.complete = false;
-    }
-
-    private double calculateTotal() {
-        return this.grossAmount - (this.discount * this.grossAmount);
-    }
-
-    public String updateStatus() {
-        this.complete = true;
-        return "Order has been set to completed...!!!";
-    }
-}
-
 public class FinalProject {
     /* Generate Account Number */
     public static String generateAccountNumber() {
@@ -87,44 +16,78 @@ public class FinalProject {
         return accountNumber;
     }
 
-    /* Generate Id */
-    public static int generateId(ArrayList<Customer> noCustomer) {
+    /* Generate Customer Id */
+    public static int generateCustomerId(ArrayList<Customer> noCustomer) {
         return noCustomer.size();
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
+    /* Generate Order Id */
+    public static int generateOrderId(ArrayList<Order> orders) {
+        return orders.size();
+    }
 
-        ArrayList<Customer> customers = new ArrayList<>();
-        Scanner input = new Scanner(System.in);
-        byte choice = 0;
-        do {
-            System.out.print("Enter your user name: ");
-            String userName = input.next();
-            System.out.print("Enter your password: ");
-            String password = input.next();
-            System.out.print("Enter your first name: ");
-            String firstName = input.next();
-            System.out.print("Enter your last name: ");
-            String lastName = input.next();
-            System.out.print("Enter your initial balance: ");
-            double balance = input.nextDouble();
-            System.out.print("Enter your discount status: ");
-            boolean discountStatus = input.nextBoolean();
-            int id = generateId(customers);
-            // create customer object
-            Customer C1 = new Customer(id, generateAccountNumber(), userName, password, firstName, lastName, balance,
-                    "Branch789", discountStatus);
-            customers.add(C1);
-            // ask if want to create another user
-            System.out.println("Enter 1 to create new user");
-            choice = input.nextByte();
-        } while (choice == 1);
-        for (int i = 0; i < customers.size(); i++) {
-            System.out.println(customers.get(i));
+    static Scanner input = new Scanner(System.in);
+
+    /* Create a new User */
+    public static void createNewUser(ArrayList<Customer> customers) {
+        System.out.print("Enter your user name: ");
+        String userName = input.next();
+        System.out.print("Enter your password: ");
+        String password = input.next();
+        System.out.print("Enter your first name: ");
+        String firstName = input.next();
+        System.out.print("Enter your last name: ");
+        String lastName = input.next();
+        System.out.print("Enter your initial balance: ");
+        double balance = input.nextDouble();
+        System.out.print("Enter your discount status: ");
+        boolean discountStatus = input.nextBoolean();
+        int id = generateCustomerId(customers);
+        // create customer object
+        Customer C1 = new Customer(id, generateAccountNumber(), userName, password, firstName, lastName, balance,
+                "Branch789", discountStatus);
+        customers.add(C1);
+        System.out.println("This is your id. It will be used for future transactions: " + C1.getId());
+    }
+
+    /* Place Order */
+    public static void placeAnOrder(ArrayList<Customer> customers, ArrayList<Order> orders) {
+        System.out.print("Enter your ID: ");
+        int id = input.nextInt();
+        for (Customer customer : customers) {
+            if (id == customer.getId()) {
+                Order O1 = new Order(generateOrderId(orders), 0.1, 5000);
+                orders.add(O1);
+                customer.addOrder(O1);
+            } else {
+                System.out.println("Please Enter a Valid Id");
+            }
         }
     }
 
+    public static void main(String[] args) {
+        ArrayList<Customer> customers = new ArrayList<>();
+        ArrayList<Order> orders = new ArrayList<>();
+        System.out.println("*******************************Welcome*******************************");
+        System.out.println("*********************************************************************");
+        while (true) {
+            System.out.println("Enter: \n1 to create new Customer \2 to place an order");
+            byte userChoice = input.nextByte();
+            switch (userChoice) {
+                case 1:
+                    createNewUser(customers);
+                    continue;
+                case 2:
+                    placeAnOrder(customers, orders);
+                    continue;
+                case 3:
+                    break;
+            }
+            break;
+        }
+
+        for (Customer customer : customers) {
+            System.out.println(customer);
+        }
+    }
 }
