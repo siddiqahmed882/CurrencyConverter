@@ -1,6 +1,11 @@
 package finalproject;
 
 import java.util.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class FinalProject {
     /* Generate Account Number */
@@ -65,29 +70,38 @@ public class FinalProject {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
         ArrayList<Customer> customers = new ArrayList<>();
         ArrayList<Order> orders = new ArrayList<>();
         System.out.println("*******************************Welcome*******************************");
         System.out.println("*********************************************************************");
-        while (true) {
-            System.out.println("Enter: \n1 to create new Customer \2 to place an order");
-            byte userChoice = input.nextByte();
-            switch (userChoice) {
-                case 1:
-                    createNewUser(customers);
-                    continue;
-                case 2:
-                    placeAnOrder(customers, orders);
-                    continue;
-                case 3:
-                    break;
-            }
-            break;
-        }
+        // while (true) {
+        // System.out.println("Enter: \n1 to create new Customer \2 to place an order");
+        // byte userChoice = input.nextByte();
+        // switch (userChoice) {
+        // case 1:
+        // createNewUser(customers);
+        // continue;
+        // case 2:
+        // placeAnOrder(customers, orders);
+        // continue;
+        // case 3:
+        // break;
+        // }
+        // break;
+        // }
+        // for (Customer customer : customers) {
+        // System.out.println(customer);
+        // }
+        /* Feteching data from API */
+        var url = "http://api.exchangeratesapi.io/v1/latest?access_key=aa1c1369316345b5853148adb32ad624&format=1";
 
-        for (Customer customer : customers) {
-            System.out.println(customer);
-        }
+        var request = HttpRequest.newBuilder().GET().uri(URI.create(url)).build();
+
+        var client = HttpClient.newBuilder().build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(response.body());
     }
 }
