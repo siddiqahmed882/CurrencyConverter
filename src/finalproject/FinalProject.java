@@ -1,7 +1,6 @@
 package finalproject;
 
 import java.util.*;
-import java.io.IOException;
 
 public class FinalProject {
     /* Generate Account Number */
@@ -22,15 +21,17 @@ public class FinalProject {
         return noCustomer.size();
     }
 
-    /* Generate Order Id */
-    public static int generateOrderId(ArrayList<Order> orders) {
-        return orders.size();
-    }
-
     static Scanner input = new Scanner(System.in);
 
-    /* Create a new User */
+    /**
+     * Create a new user
+     * 
+     * @param customers List of all the customers
+     */
     public static void createNewUser(ArrayList<Customer> customers) {
+        System.out.println("Please fill the required fields properly");
+        int id = generateCustomerId(customers);
+        String AC = generateAccountNumber();
         System.out.print("Enter your user name: ");
         String userName = input.next();
         System.out.print("Enter your password: ");
@@ -41,90 +42,171 @@ public class FinalProject {
         String lastName = input.next();
         System.out.print("Enter your initial balance: ");
         double balance = input.nextDouble();
-        int id = generateCustomerId(customers);
+        System.out.println(
+                "\n\nDo you want our Silver or Gold membership?\nYou will get 5% off on all order in SILVER MEMBERSHIP and 10% off on all orders in GOLD MEMBERSHIP...!!!");
+        System.out.print(
+                "Enter 1 to become a Silver Customer\nEnter 2 to become a Gold Customer\nEnter 3 if you don't want to avail this offer at the moment.\n");
+        System.out.print("Enter your choice :");
+        byte choice = input.nextByte();
         // create customer object
-        Customer C1 = new Customer(id, generateAccountNumber(), userName, password, firstName, lastName, balance,
-                "Branch789");
-        customers.add(C1);
-        System.out.println("\nThis is your id. It will be used for future transactions: " + C1.getId());
+        Customer C1;
+        switch (choice) {
+            case 1:
+                C1 = new SilverCustomer(id, AC, userName, password, firstName, lastName, balance, "789");
+                customers.add(C1);
+                break;
+            case 2:
+                C1 = new GoldCustomer(id, AC, userName, password, firstName, lastName, balance, "789");
+                customers.add(C1);
+                break;
+            case 3:
+                C1 = new Customer(id, generateAccountNumber(), userName, password, firstName, lastName, balance, "789");
+                customers.add(C1);
+                break;
+        }
     }
 
-    /* Create new Orer */
-    public static Order createNewOrder(int id) {
-        System.out.println("\nPlease Enter the discount in this format;\n\t10%% --> 0.1\n\t20% --> 0.2 ....");
-        System.out.print("Enter the discount: ");
-        double discount = input.nextDouble();
-        System.out.print("Enter the total amount: ");
-        double grossAmount = input.nextDouble();
-        return new Order(id, discount, grossAmount);
-    }
-
-    /* Place Order */
-    public static void placeAnOrder(ArrayList<Customer> customers, ArrayList<Order> orders) {
-        System.out.print("Enter your User Name: ");
-        String userName = input.next();
-        System.out.print("Enter your password: ");
-        String pw = input.next();
-        for (Customer customer : customers) {
-            if (userName.equals(customer.getUserName())) {
-                if (pw.equals(customer.getPassword())) {
-                    int orderId = generateOrderId(orders);
-                    Order O1 = createNewOrder(orderId);
-                    orders.add(O1);
-                    customer.addOrder(O1);
-                    System.out.println(
-                            "\n" + O1.getId() + ": This is your order id. This will be used for further transactions");
-                    break;
+    /* Login */
+    public static void loginToExistingAccount(ArrayList<Customer> customers) {
+        Customer currCustomer = null;
+        do {
+            System.out.print("Please Enter your UserName: ");
+            String userName = input.nextLine();
+            System.out.print("Please Enter your password: ");
+            String password = input.nextLine();
+            for (Customer c : customers) {
+                if (userName.equals(c.getUserName()) && password.equals(c.getPassword())) {
+                    currCustomer = c;
+                } else {
+                    System.out.println("Incorrect userName/password combination. Please try again");
                 }
             }
-            System.out.println("\nUser Name or password you entered is incorrect");
+        } while (currCustomer == null);
+
+        showCustomerMenu(currCustomer);
+    }
+
+    public static void showCustomerMenu(Customer currCustomer) {
+        System.out.printf("\n\nWelcome %s\n\n", currCustomer.getFullName());
+        System.out.println("Please Enter \n\t1 to edit your details");
+        System.out.println("\t2 to place a new order");
+        System.out.println("\t3 to make payment");
+        System.out.print("Enter :");
+        int choice = input.nextInt();
+        switch (choice) {
+            case 1:
+                editPersonalInfo(currCustomer);
+                break;
+            case 2:
+                createNewOrder(currCustomer);
+                break;
+            case 3:
+                makePayment(currCustomer);
+                break;
         }
+    }
+
+    /* Edit Personal Info */
+    public static void editPersonalInfo(Customer currCustomer) {
+        System.out.println("Babu bhaiya mera kam baqi hai abi :))");
+        showCustomerMenu(currCustomer);
+    }
+
+    /* Create new Order */
+    public static void createNewOrder(Customer currCustomer) {
+        if (currCustomer instanceof SilverCustomer) {
+            currCustomer = (SilverCustomer) currCustomer;
+        } else if (currCustomer instanceof GoldCustomer) {
+            currCustomer = (GoldCustomer) currCustomer;
+        }
+        double discount = currCustomer.getDiscount();
+        System.out.print("Please Enter the total cost: ");
+        double grossAmount = input.nextDouble();
+        Order newOrder = new Order(discount, grossAmount, currCustomer);
+        Order.orders.add(newOrder);
+        currCustomer.orders.add(newOrder);
+        System.out.printf("This is your order id [%d]. It will be user for further transaction", newOrder.getId());
+        showCustomerMenu(currCustomer);
     }
 
     /* Make Payment */
-    public static void makePayment(ArrayList<Customer> customers) {
-        System.out.print("Enter your User Name: ");
-        String userName = input.next();
-        System.out.print("Enter your password: ");
-        String pw = input.next();
-        for (Customer customer : customers) {
-            if (userName.equals(customer.getUserName()) && pw.equals(customer.getPassword())) {
-                System.out.print("Enter your Order ID: ");
-                int id = input.nextInt();
-                for (Order order : customer.getOrders()) {
-                    if (order.getId() != id)
-                        return;
-                    if (order.getStatus()) {
-                        System.out.println("You have already Paid for it");
-                        return;
-                    } else {
-                        String[] Currency_Codes = { "\n" + "United States->USD", "Australian Dollar->AUD",
-                                "British Pound->GBP", "Canadian Dollar->CAD", "Turkish Lira->TRY",
-                                "Indonesian Rupiya->IDR", "Afghan Afghani->AFN", "Pakistani Rupee->PKR" };
-                        System.out.println(Arrays.toString(Currency_Codes));
-                        System.out.print("\nEnter the currency of payment: ");
-                        String currencyOut = input.next();
-                        Currency C1 = new Currency(1, "PKR", currencyOut);
-                        System.out.println("Your payable amount is: "
-                                + C1.convertCurrency(order.getTotalCost(), "PKR", currencyOut));
-                        System.out.println("Are you paying right now? 'Yes' OR 'NO'");
-                        String choice = input.next().toLowerCase();
-                        boolean flag = (choice.equals("yes")) ? true : false;
-                        if (flag) {
-                            var success = makePayment(customer, order);
-                            if (success) {
-                                System.out.println("Thank you For The Payment.");
-                                order.setStatus(flag);
-                            } else {
-                                System.out.println("Insuufficient balance..!!!");
-                            }
-                        } else {
-                            System.out.println("Its Okay :((");
-                        }
-                    }
+    public static void makePayment(Customer currCustomer) {
+        // init
+        boolean repeat = false;
+        Integer choice;
+        String currencyOut;
+        double payableAmount;
+        do {
+            System.out.println(Order.getOrderSummary(currCustomer));
+            System.out.print("Please Enter a valid order id: ");
+            choice = input.nextInt();
+            for (Order order : currCustomer.getOrders()) {
+                if (!order.getId().equals(choice)) {
+                    System.out.println("Invalid ID. please try again");
+                    repeat = true;
+                } else {
+                    repeat = false;
                 }
             }
+        } while (repeat);
+
+        /* user has entered a valid orderId. Now Prompt him to make a payment */
+
+        // check if he has already paid. and return if it is true
+        Order order = currCustomer.getOrders().get(choice);
+        if (order.getStatus()) {
+            System.out.println("You have already paid...!!!");
+            return;
         }
+
+        // user has to make a payment
+        System.out.print("\n\nWhich currency do you want to make payment in?\n\n");
+        String[] currencyCodes = { "United States -> USD", "Australian Dollar -> AUD", "British Pound -> GBP",
+                "Canadian Dollar -> CAD", "Turkish Lira -> TRY", "Indonesian Rupiya -> IDR", "Afghan Afghani -> AFN",
+                "Pakistani Rupee -> PKR" };
+        String[] codes = { "USD", "AUD", "GBP", "CAD", "TRY", "IDR", "AFN", "PKR" };
+        for (String code : currencyCodes)
+            System.out.println(code);
+        System.out.println();
+        do {
+            System.out.print("Enter :");
+            currencyOut = input.next();
+            for (String code : codes) {
+                if (!code.equals(currencyOut)) {
+                    repeat = true;
+                } else {
+                    repeat = false;
+                }
+            }
+            if (repeat) {
+                System.out.print("\nPlease Enter a valid Code: ");
+            }
+        } while (repeat);
+
+        // Displaying total cost
+        double totalCost = currCustomer.getOrders().get(choice).getTotalCost();
+        payableAmount = Currency.convertCurrency(totalCost, currencyOut);
+        System.out.println("Your payable amount is: " + payableAmount);
+        if (currCustomer.getBalance() < totalCost) {
+            System.out.printf("Insufficient Balance.\n" + "Your balance is :" + currCustomer.getBalance());
+            // ask user if you want to deposit money in his account
+            return;
+        }
+
+        int confirmPayment;
+        do {
+            System.out.println("Enter 1 to confirm payment or 0 to exit");
+            confirmPayment = input.nextInt();
+        } while (confirmPayment < 0 || confirmPayment > 1);
+
+        if (confirmPayment == 1) {
+            currCustomer.setBalance(currCustomer.getBalance() - totalCost);
+            System.out.print("\nThank you for the payment.\nYour remaining Balance is " + currCustomer.getBalance());
+        } else if (confirmPayment == 0) {
+            System.out.println("Its Okay :((");
+        }
+
+        showCustomerMenu(currCustomer);
     }
 
     public static boolean makePayment(Customer customer, Order order) {
@@ -139,34 +221,29 @@ public class FinalProject {
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         ArrayList<Customer> customers = new ArrayList<>();
         ArrayList<Order> orders = new ArrayList<>();
         System.out.println("**********Welcome**********");
         System.out.println("***********************");
+        byte choice;
         while (true) {
-            System.out.println(
-                    "Enter: \n1 to create new Customer \n2 to place an order \n3 to make a payment \n4 To quit");
-            byte userChoice = input.nextByte();
-            if (userChoice != 4) {
-                switch (userChoice) {
-                    case 1:
-                        createNewUser(customers);
-                        continue;
-                    case 2:
-                        placeAnOrder(customers, orders);
-                        continue;
-                    case 3:
-                        makePayment(customers);
-                        continue;
+            do {
+                System.out.println("Please Enter\n\t1 to create an account;\n\t2 to login");
+                choice = input.nextByte();
+                // check if the input option is valid
+                if (choice < 1 || choice > 2) {
+                    System.out.println("Please choose a valid option");
                 }
+            } while (choice < 1 || choice > 2); // continue looping till user enter a correct option
+            switch (choice) {
+                case 1:
+                    createNewUser(customers);
+                    break;
+                case 2:
+                    loginToExistingAccount(customers);
+                    break;
             }
-            System.out.println("\n<<< SUMMARY >>>\n");
-            break;
-        }
-
-        for (Customer customer : customers) {
-            System.out.println(customer);
         }
 
     }

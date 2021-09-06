@@ -11,7 +11,7 @@ public class Customer {
   String lastName;
   double balance;
   String branchCode;
-  boolean discountStatus;
+  static double discount = 0;
   ArrayList<Order> orders;
 
   Customer(int id, String AC, String userName, String password, String firstName, String lastName, double balance,
@@ -24,7 +24,6 @@ public class Customer {
     this.lastName = lastName;
     this.balance = balance;
     this.branchCode = branchCode;
-    this.discountStatus = false;
     this.orders = new ArrayList<>();
   }
 
@@ -48,13 +47,12 @@ public class Customer {
     return balance;
   }
 
-  public void setBalance(double balance) {
-    this.balance = balance;
+  public double getDiscount() {
+    return Customer.discount;
   }
 
-  public String changeDiscountStatus(boolean discountStatus) {
-    this.discountStatus = discountStatus;
-    return "Discount Status Updated....!!!";
+  public void setBalance(double balance) {
+    this.balance = balance;
   }
 
   public String changePassword(String password) {
@@ -69,5 +67,9 @@ public class Customer {
   public String toString() {
     return "ID: " + id + "\n" + "Account Number: " + AC + "\n" + "Name: " + firstName + " " + lastName + "\n"
         + "Balance: " + balance + "\n" + "orders: " + this.orders.size();
+  }
+
+  public Object getFullName() {
+    return this.firstName + " " + this.lastName;
   }
 }
