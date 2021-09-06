@@ -19,12 +19,32 @@ public class Order {
     this.complete = false;
   }
 
+  public int getId() {
+    return this.id;
+  }
+
   private double calculateTotal() {
     return this.grossAmount - (this.discount * this.grossAmount);
+  }
+
+  public boolean getStatus() {
+    return this.complete;
+  }
+
+  public void setStatus(boolean flag) {
+    this.complete = flag;
+  }
+
+  public double getTotalCost() {
+    return this.totalCost;
   }
 
   public String updateStatus() {
     this.complete = true;
     return "Order has been set to completed...!!!";
+  }
+
+  public String toString() {
+    return "Order Id: " + this.id + " Order Status: " + this.complete;
   }
 }
