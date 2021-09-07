@@ -21,7 +21,7 @@ public class FinalProject {
 
     /* Generate Customer Id */
     public static int generateCustomerId(ArrayList<Customer> noCustomer) {
-        return noCustomer.size();
+        return Customer.getCustomers().size();
     }
 
     /**
@@ -98,18 +98,25 @@ public class FinalProject {
 
     /* Login */
     public static void loginToExistingAccount() {
+        // init
         Customer currCustomer = null;
+        boolean customerFound = false;
         do {
             System.out.print("Please Enter your UserName: ");
-            String userName = input.nextLine();
+            String userName = input.next();
             System.out.print("Please Enter your password: ");
-            String password = input.nextLine();
+            String password = input.next();
             for (Customer c : Customer.getCustomers()) {
                 if (userName.equals(c.getUserName()) && password.equals(c.getPassword())) {
+                    customerFound = true;
                     currCustomer = c;
+                    break;
                 } else {
-                    System.out.println("Incorrect userName/password combination. Please try again");
+                    customerFound = false;
                 }
+            }
+            if (!customerFound) {
+                System.out.println("Incorrect userName/password combination. Please try again");
             }
         } while (currCustomer == null);
         System.out.printf("\n\nWelcome %s\n\n", currCustomer.getFullName());
@@ -138,7 +145,8 @@ public class FinalProject {
                 makePayment(currCustomer);
                 break;
             case 5:
-                System.out.printf("Thank you Mr %s. It was nice interacting with you. Hope to see you again");
+                System.out.printf("Thank you Mr %s. It was nice interacting with you. Hope to see you again. \n",
+                        currCustomer.getFirstName());
                 loginToExistingAccount();
                 break;
         }
@@ -210,7 +218,7 @@ public class FinalProject {
     public static void depositAmount(Customer currCustomer) {
         // init
         double amount;
-        System.out.printf("Your current balance is: %f", currCustomer.getBalance());
+        System.out.printf("Your current balance is: %.02f \n", currCustomer.getBalance());
         do {
             System.out.print("Enter amount to deposit: ");
             amount = input.nextDouble();
@@ -218,7 +226,7 @@ public class FinalProject {
                 System.out.println("Amount can not be less than zero");
         } while (amount < 0);
         currCustomer.setBalance(currCustomer.getBalance() + amount);
-        System.out.printf("\nYour balance has been added. Your new balance is: %f", currCustomer.getBalance());
+        System.out.printf("\nYour balance has been added. Your new balance is: %.02f", currCustomer.getBalance());
         showCustomerMenu(currCustomer);
     }
 
@@ -246,8 +254,13 @@ public class FinalProject {
         Integer choice;
         String currencyOut;
         double payableAmount;
+        System.out.println(Order.getOrderSummary(currCustomer));
+        if (currCustomer.getOrders().size() == 0) {
+            System.out.println("You have no Orders :((");
+            showCustomerMenu(currCustomer);
+            return;
+        }
         do {
-            System.out.println(Order.getOrderSummary(currCustomer));
             System.out.print("Please Enter a valid order id: ");
             choice = input.nextInt();
             for (Order order : currCustomer.getOrders()) {
@@ -279,17 +292,18 @@ public class FinalProject {
             System.out.println(code);
         System.out.println();
         do {
-            System.out.print("Enter :");
+            System.out.print("Enter: ");
             currencyOut = input.next();
             for (String code : codes) {
                 if (!code.equals(currencyOut)) {
                     repeat = true;
                 } else {
                     repeat = false;
+                    break;
                 }
             }
             if (repeat) {
-                System.out.print("\nPlease Enter a valid Code: ");
+                System.out.println("\nInvalid Code...!! ");
             }
         } while (repeat);
 
@@ -298,8 +312,8 @@ public class FinalProject {
         payableAmount = Currency.convertCurrency(totalCost, currencyOut);
         System.out.println("Your payable amount is: " + payableAmount);
         if (currCustomer.getBalance() < totalCost) {
-            System.out.printf("Insufficient Balance.\n" + "Your balance is :" + currCustomer.getBalance());
-            System.out.print("Do you want to deposit some money in your account?\nEnter 1 to deposit or 0 to exit");
+            System.out.printf("Insufficient Balance.\n" + "Your balance is: " + currCustomer.getBalance() + "\n");
+            System.out.print("Do you want to deposit some money in your account?\nEnter 1 to deposit or 0 to exit: ");
             int askToDeposit = input.nextInt();
             if (askToDeposit == 1) {
                 depositAmount(currCustomer);
@@ -310,13 +324,14 @@ public class FinalProject {
 
         int confirmPayment;
         do {
-            System.out.println("Enter 1 to confirm payment or 0 to exit");
+            System.out.println("Enter 1 to confirm payment or 0 to exit: ");
             confirmPayment = input.nextInt();
         } while (confirmPayment < 0 || confirmPayment > 1);
 
         if (confirmPayment == 1) {
             currCustomer.setBalance(currCustomer.getBalance() - totalCost);
-            System.out.print("\nThank you for the payment.\nYour remaining Balance is " + currCustomer.getBalance());
+            System.out.print(
+                    "\nThank you for the payment.\nYour remaining Balance is " + currCustomer.getBalance() + "\n");
         } else if (confirmPayment == 0) {
             System.out.println("Its Okay :((");
         }

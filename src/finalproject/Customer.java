@@ -1,5 +1,6 @@
 package finalproject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Customer {
@@ -13,7 +14,7 @@ public class Customer {
   String branchCode;
   static double discount = 0;
   ArrayList<Order> orders;
-  static ArrayList<Customer> customers;
+  static ArrayList<Customer> customers = new ArrayList<>();
 
   Customer(int id, String AC, String userName, String password, String firstName, String lastName, double balance,
       String branchCode) {
