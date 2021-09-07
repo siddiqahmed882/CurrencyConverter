@@ -23,8 +23,8 @@ public class Order {
     this.holder = holder;
   }
 
-  public void addOrder(Order order) {
-    this.orders.add(order);
+  public static void addOrder(Order order) {
+    Order.orders.add(order);
   }
 
   public Integer getId() {
@@ -61,11 +61,14 @@ public class Order {
   }
 
   public static String getOrderSummary(Customer customer) {
-    String res = "You have no orders";
+    String res = "";
     for (Order order : orders) {
       if (order.getHolder().getId() == customer.getId()) {
-        res = "Order ID: " + order.getId().toString() + "| Paid: " + order.getStatus() + "\n";
+        res += "Order ID: " + order.getId().toString() + "| Paid: " + order.getStatus() + "\n";
       }
+    }
+    if (res.equals("")) {
+      res = "You have no orders";
     }
     return res;
   }

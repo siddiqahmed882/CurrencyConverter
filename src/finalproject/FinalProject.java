@@ -147,7 +147,6 @@ public class FinalProject {
             case 5:
                 System.out.printf("Thank you Mr %s. It was nice interacting with you. Hope to see you again. \n",
                         currCustomer.getFirstName());
-                loginToExistingAccount();
                 break;
         }
     }
@@ -241,7 +240,7 @@ public class FinalProject {
         System.out.print("Please Enter the total cost: ");
         double grossAmount = input.nextDouble();
         Order newOrder = new Order(discount, grossAmount, currCustomer);
-        Order.orders.add(newOrder);
+        Order.addOrder(newOrder);
         currCustomer.orders.add(newOrder);
         System.out.printf("This is your order id [%d]. It will be user for further transaction", newOrder.getId());
         showCustomerMenu(currCustomer);
@@ -252,32 +251,35 @@ public class FinalProject {
         // init
         boolean repeat = false;
         Integer choice;
+        Order orderToBePaid = null;
         String currencyOut;
         double payableAmount;
         System.out.println(Order.getOrderSummary(currCustomer));
         if (currCustomer.getOrders().size() == 0) {
-            System.out.println("You have no Orders :((");
             showCustomerMenu(currCustomer);
             return;
         }
         do {
             System.out.print("Please Enter a valid order id: ");
             choice = input.nextInt();
+            System.out.println(currCustomer.getOrders());
             for (Order order : currCustomer.getOrders()) {
+                System.out.println(order.getId());
                 if (!order.getId().equals(choice)) {
-                    System.out.println("Invalid ID. please try again");
                     repeat = true;
                 } else {
                     repeat = false;
+                    orderToBePaid = order;
+                    break;
                 }
             }
+            if (repeat)
+                System.out.println("Invalid ID. please try again");
         } while (repeat);
 
         /* user has entered a valid orderId. Now Prompt him to make a payment */
-
         // check if he has already paid. and return if it is true
-        Order order = currCustomer.getOrders().get(choice);
-        if (order.getStatus()) {
+        if (orderToBePaid.getStatus()) {
             System.out.println("You have already paid...!!!");
             return;
         }
@@ -308,7 +310,7 @@ public class FinalProject {
         } while (repeat);
 
         // Displaying total cost
-        double totalCost = currCustomer.getOrders().get(choice).getTotalCost();
+        double totalCost = orderToBePaid.getTotalCost();
         payableAmount = Currency.convertCurrency(totalCost, currencyOut);
         System.out.println("Your payable amount is: " + payableAmount);
         if (currCustomer.getBalance() < totalCost) {
@@ -332,6 +334,8 @@ public class FinalProject {
             currCustomer.setBalance(currCustomer.getBalance() - totalCost);
             System.out.print(
                     "\nThank you for the payment.\nYour remaining Balance is " + currCustomer.getBalance() + "\n");
+            orderToBePaid.setStatus(true);
+            ;
         } else if (confirmPayment == 0) {
             System.out.println("Its Okay :((");
         }
