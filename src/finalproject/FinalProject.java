@@ -3,6 +3,9 @@ package finalproject;
 import java.util.*;
 
 public class FinalProject {
+    /* Scanner Object for input */
+    static Scanner input = new Scanner(System.in);
+
     /* Generate Account Number */
     public static String generateAccountNumber() {
         String[] arr = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
@@ -21,60 +24,87 @@ public class FinalProject {
         return noCustomer.size();
     }
 
-    static Scanner input = new Scanner(System.in);
-
     /**
      * Create a new user
      * 
      * @param customers List of all the customers
      */
-    public static void createNewUser(ArrayList<Customer> customers) {
+    public static void createNewUser() {
+        // init
+        String userName;
+        String password;
+        String firstName;
+        String lastName;
+        double balance;
+        boolean userNameTaken = false;
+        Customer C1;
+        // generating id and account number
         System.out.println("Please fill the required fields properly");
-        int id = generateCustomerId(customers);
+        int id = generateCustomerId(Customer.getCustomers());
         String AC = generateAccountNumber();
-        System.out.print("Enter your user name: ");
-        String userName = input.next();
+
+        // continue looping if username is already taken
+        do {
+            System.out.print("Enter your user name: ");
+            userName = input.next();
+            userNameTaken = checkUserName(userName);
+            if (userNameTaken)
+                System.out.println("username has already been taken");
+        } while (userNameTaken);
+
         System.out.print("Enter your password: ");
-        String password = input.next();
+        password = input.next();
         System.out.print("Enter your first name: ");
-        String firstName = input.next();
+        firstName = input.next();
         System.out.print("Enter your last name: ");
-        String lastName = input.next();
+        lastName = input.next();
         System.out.print("Enter your initial balance: ");
-        double balance = input.nextDouble();
+        balance = input.nextDouble();
         System.out.println(
                 "\n\nDo you want our Silver or Gold membership?\nYou will get 5% off on all order in SILVER MEMBERSHIP and 10% off on all orders in GOLD MEMBERSHIP...!!!");
         System.out.print(
                 "Enter 1 to become a Silver Customer\nEnter 2 to become a Gold Customer\nEnter 3 if you don't want to avail this offer at the moment.\n");
         System.out.print("Enter your choice :");
         byte choice = input.nextByte();
+
         // create customer object
-        Customer C1;
         switch (choice) {
             case 1:
                 C1 = new SilverCustomer(id, AC, userName, password, firstName, lastName, balance, "789");
-                customers.add(C1);
+                Customer.addCustomers(C1);
                 break;
             case 2:
                 C1 = new GoldCustomer(id, AC, userName, password, firstName, lastName, balance, "789");
-                customers.add(C1);
+                Customer.addCustomers(C1);
                 break;
             case 3:
                 C1 = new Customer(id, generateAccountNumber(), userName, password, firstName, lastName, balance, "789");
-                customers.add(C1);
+                Customer.addCustomers(C1);
                 break;
         }
     }
 
+    /* Check User Name */
+    public static boolean checkUserName(String name) {
+        // init
+        boolean userNameTaken = false;
+        for (Customer c : Customer.getCustomers()) {
+            if (c.getUserName().equals(name)) {
+                userNameTaken = true;
+            }
+        }
+        return userNameTaken;
+    }
+
     /* Login */
-    public static void loginToExistingAccount(ArrayList<Customer> customers) {
+    public static void loginToExistingAccount() {
         Customer currCustomer = null;
         do {
             System.out.print("Please Enter your UserName: ");
             String userName = input.nextLine();
             System.out.print("Please Enter your password: ");
             String password = input.nextLine();
-            for (Customer c : customers) {
+            for (Customer c : Customer.getCustomers()) {
                 if (userName.equals(c.getUserName()) && password.equals(c.getPassword())) {
                     currCustomer = c;
                 } else {
@@ -82,15 +112,16 @@ public class FinalProject {
                 }
             }
         } while (currCustomer == null);
-
+        System.out.printf("\n\nWelcome %s\n\n", currCustomer.getFullName());
         showCustomerMenu(currCustomer);
     }
 
     public static void showCustomerMenu(Customer currCustomer) {
-        System.out.printf("\n\nWelcome %s\n\n", currCustomer.getFullName());
         System.out.println("Please Enter \n\t1 to edit your details");
-        System.out.println("\t2 to place a new order");
-        System.out.println("\t3 to make payment");
+        System.out.println("\t2 to deposit money in your account");
+        System.out.println("\t3 to place a new order");
+        System.out.println("\t4 to make payment");
+        System.out.println("\t5 to logout and exit");
         System.out.print("Enter :");
         int choice = input.nextInt();
         switch (choice) {
@@ -98,17 +129,96 @@ public class FinalProject {
                 editPersonalInfo(currCustomer);
                 break;
             case 2:
-                createNewOrder(currCustomer);
+                depositAmount(currCustomer);
                 break;
             case 3:
+                createNewOrder(currCustomer);
+                break;
+            case 4:
                 makePayment(currCustomer);
+                break;
+            case 5:
+                System.out.printf("Thank you Mr %s. It was nice interacting with you. Hope to see you again");
+                loginToExistingAccount();
                 break;
         }
     }
 
     /* Edit Personal Info */
     public static void editPersonalInfo(Customer currCustomer) {
-        System.out.println("Babu bhaiya mera kam baqi hai abi :))");
+        // init
+        int choice;
+
+        // continue looping unless correct option is selected
+        do {
+            System.out.println("Account's Summary:");
+            System.out.printf("First Name: %s | Last Name: %s | Balance: %f\n\n", currCustomer.getFirstName(),
+                    currCustomer.getLastName(), currCustomer.getBalance());
+            System.out.println("Please Enter\n\t1 to edit your First Name.");
+            System.out.println("\t2 to edit your Last Name.");
+            System.out.println("\t3 to edit your User Name.");
+            System.out.println("\t4 to edit Password");
+            System.out.println("\t5 to exit");
+            choice = input.nextInt();
+            if (choice < 1 || choice > 5)
+                System.out.println("Invalid Choice...!!!");
+        } while (choice < 1 || choice > 5);
+
+        // user has selected a valid option. process the choice
+        switch (choice) {
+            case 1:
+                System.out.print("Enter Your First Name: ");
+                String fname = input.next();
+                currCustomer.setFirstName(fname);
+                break;
+            case 2:
+                System.out.print("Enter Your Last Name: ");
+                String lname = input.next();
+                currCustomer.setLastName(lname);
+                break;
+            case 3:
+                System.out.print("Enter Your User Name: ");
+                String userName = input.next();
+                currCustomer.setUserName(userName);
+                break;
+            case 4:
+                boolean repeat = false;
+                do {
+                    System.out.print("Please Enter Your Old Password to proceed: ");
+                    String oldPassword = input.next();
+                    if (oldPassword.equals(currCustomer.getPassword())) {
+                        System.out.print("Enter A New Password: ");
+                        String password = input.next();
+                        currCustomer.changePassword(password);
+                        repeat = false;
+                    } else {
+                        System.out.println("You have entered invalid password.");
+                        System.out.print("Enter 1 to retry and 0 to exit");
+                        int retryOrExit = input.nextInt();
+                        repeat = (retryOrExit == 1) ? true : false;
+                    }
+                } while (repeat);
+                break;
+            case 5:
+                showCustomerMenu(currCustomer);
+                break;
+        }
+        editPersonalInfo(currCustomer);
+    }
+
+    /* Deposit Amount */
+    public static void depositAmount(Customer currCustomer) {
+        // init
+        double amount;
+        System.out.printf("Your current balance is: %f", currCustomer.getBalance());
+        do {
+            System.out.print("Enter amount to deposit: ");
+            amount = input.nextDouble();
+            if (amount < 0)
+                System.out.println("Amount can not be less than zero");
+        } while (amount < 0);
+        currCustomer.setBalance(currCustomer.getBalance() + amount);
+        System.out.printf("\nYour balance has been added. Your new balance is: %f", currCustomer.getBalance());
         showCustomerMenu(currCustomer);
     }
 
@@ -189,8 +299,13 @@ public class FinalProject {
         System.out.println("Your payable amount is: " + payableAmount);
         if (currCustomer.getBalance() < totalCost) {
             System.out.printf("Insufficient Balance.\n" + "Your balance is :" + currCustomer.getBalance());
-            // ask user if you want to deposit money in his account
-            return;
+            System.out.print("Do you want to deposit some money in your account?\nEnter 1 to deposit or 0 to exit");
+            int askToDeposit = input.nextInt();
+            if (askToDeposit == 1) {
+                depositAmount(currCustomer);
+            } else {
+                return;
+            }
         }
 
         int confirmPayment;
@@ -222,10 +337,8 @@ public class FinalProject {
     }
 
     public static void main(String[] args) {
-        ArrayList<Customer> customers = new ArrayList<>();
-        ArrayList<Order> orders = new ArrayList<>();
         System.out.println("**********Welcome**********");
-        System.out.println("***********************");
+        System.out.println("***************************");
         byte choice;
         while (true) {
             do {
@@ -238,10 +351,10 @@ public class FinalProject {
             } while (choice < 1 || choice > 2); // continue looping till user enter a correct option
             switch (choice) {
                 case 1:
-                    createNewUser(customers);
+                    createNewUser();
                     break;
                 case 2:
-                    loginToExistingAccount(customers);
+                    loginToExistingAccount();
                     break;
             }
         }

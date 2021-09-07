@@ -13,6 +13,7 @@ public class Customer {
   String branchCode;
   static double discount = 0;
   ArrayList<Order> orders;
+  static ArrayList<Customer> customers;
 
   Customer(int id, String AC, String userName, String password, String firstName, String lastName, double balance,
       String branchCode) {
@@ -31,12 +32,16 @@ public class Customer {
     return this.id;
   }
 
-  public ArrayList<Order> getOrders() {
-    return this.orders;
-  }
-
   public String getUserName() {
     return userName;
+  }
+
+  public String getFirstName() {
+    return this.firstName;
+  }
+
+  public String getLastName() {
+    return this.lastName;
   }
 
   public String getPassword() {
@@ -51,6 +56,29 @@ public class Customer {
     return Customer.discount;
   }
 
+  public ArrayList<Order> getOrders() {
+    return this.orders;
+  }
+
+  public static ArrayList<Customer> getCustomers() {
+    return customers;
+  }
+
+  public void setFirstName(String name) {
+    this.firstName = name;
+    System.out.println("First Name Updated Successfully...!!");
+  }
+
+  public void setLastName(String name) {
+    this.lastName = name;
+    System.out.println("Last Name Updated Successfully...!!");
+  }
+
+  public void setUserName(String userName) {
+    this.userName = userName;
+    System.out.println("User Name Updated Successfully...!!");
+  }
+
   public void setBalance(double balance) {
     this.balance = balance;
   }
@@ -62,6 +90,10 @@ public class Customer {
 
   public void addOrder(Order order) {
     this.orders.add(order);
+  }
+
+  public static void addCustomers(Customer customer) {
+    Customer.customers.add(customer);
   }
 
   public String toString() {
